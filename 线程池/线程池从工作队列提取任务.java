@@ -12,7 +12,7 @@ private Runnable getTask() {
         //      将工作线程数减1,并返回null,导致runWorker()会跳出循环,执行退出流程processWorkerExit(),从workers集合中移除当前的worker
         // 情况2:线程池状态等于SHUTDOWN,且工作队列为空,由于SHUTDOWN状态的线程池不会接收新的任务,只会在处理完工作队列中的任务,就切换到STOP状态
         //      所以,当工作队列为空时,处理流程和情况1相同
-        // 情况3:线程池状态等于SHUTDOWN,且工作队列不为空,继续执行从工作队列获取任务的操作
+        // 情况3:线程池状态等于SHUTDOWN,且工作队列不为空,跳过;这个是shutdown()明明打断了所有的工作线程,但是只有空闲线程会被销毁的原因,结合timed变量和poll()方法理解
         if (rs >= SHUTDOWN && (rs >= STOP || workQueue.isEmpty())) {
             decrementWorkerCount();
             return null;
@@ -39,6 +39,7 @@ private Runnable getTask() {
         try {
             // timed=true:将调用poll()阻塞获取任务,超时将返回null
             // timed=false:将调用take()阻塞获取任务,不会超时,直到获取到任务才会返回
+            // 注意点:poll()和take()方法都能响应打断
             Runnable r = timed ?
                 workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :
                 workQueue.take();
