@@ -6,17 +6,33 @@ public void execute(Runnable command) {
     // workerCountOf(c)作用:得到当前线程池的线程数
     // 若工作线程数小于核心线程数,则创建新的线程来执行任务
     if (workerCountOf(c) < corePoolSize) {
+        // 创建一个新的工作线程来执行任务
+        // 注意:这里不需要判断线程池的状态,addWorker()方法里面会判定
         if (addWorker(command,true))
             return;
         c = ctl.get();
     }
+    // isRunning():判断线程池状态是不是RUNNING
+    // workQueue.offer():任务添加到队列中,成功返回true,失败返回fasle
     if (isRunning(c) && workQueue.offer(command)) {
+        // 能进入这里,表示任务已经添加到了工作队列中
         int recheck = ctl.get();
+        // 再次判断线程池是否RUNNING,防止此时线程池被关闭
+        // 若线程池不处于RUNNING状态,则从工作队列中移除刚入队的任务,同时尝试将线程池状态改为TERMINATED,真正的关闭
         if (! isRunning(recheck) && remove(command))
+            // 调用线程池的拒绝策略来处理此任务
             reject(command);
+        // 这里是一个很有意思的点:如果设置线程池的核心线程数为0,工作队列为无界队列,那么,正常来说,队列中的任务,应该永远也不会执行,因为没有工作线程被创建出来
+        // 但是,因为这里有了workerCountOf(recheck) == 0的判断,即使工作队列没有满,仍然会创建一个工作线程来执行工作队列中的任务
         else if (workerCountOf(recheck) == 0)
             addWorker(null,false);
     }
+    // 能进入这里,有两种情况:
+    //      1. 线程池不处于RUNNING状态
+    //      2. 线程池处于RUNNING状态,但是工作队列满了
+    // 针对情况1:由于addWorker()会判断线程池状态,这里会创建工作线程失败,直接返回false,然后调用拒绝策略;
+    //          小概率情况--线程池是SHUTDOWN状态,firstTask(command)为null,工作队列不为空,可能会创建工作线程成功
+    // 针对情况2:创建新的工作线程来当前的任务
     else if (!addWorker(command,false))
         reject(command);
 }
@@ -39,7 +55,7 @@ private boolean addWorker(Runnable firstTask,boolean core) {
         for (;;) {
             // 获取工作线程数
             int wc = workerCountOf(c);
-            // 若工作线程数大于最大线程容量,创建新线程失败,返回fasle
+            // 若工作线程数大于最大线程容量(536,870,911),创建新线程失败,返回fasle
             // 若工作线程数大于约束,创建新线程失败,返回fasle
             // 若core=true,表示使用核心线程数做约束,core=false,表示使用最大线程数做约束
             if (wc >= CAPACITY ||
