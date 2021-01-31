@@ -35,7 +35,7 @@ public void execute(Runnable command) {
     //      2. 线程池处于RUNNING状态,但是工作队列满了
     // 针对情况1:由于addWorker()会判断线程池状态,这里会创建工作线程失败,直接返回false,然后调用拒绝策略;
     //          小概率情况--线程池是SHUTDOWN状态,firstTask(command)为null,工作队列不为空,可能会创建工作线程成功
-    // 针对情况2:创建新的工作线程来当前的任务
+    // 针对情况2:创建新的工作线程来当前的任务,若当前工作线程数大于指定的最大工作线程数,也会返回false,然后调用拒绝策略;
     else if (!addWorker(command,false))
         reject(command);
 }
