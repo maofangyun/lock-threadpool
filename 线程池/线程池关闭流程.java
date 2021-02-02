@@ -73,7 +73,7 @@ final void tryTerminate() {
             // 注意ONLY_ONE=true:表示interruptIdleWorkers()方法此时只会打断一个工作线程,
             // 然后此被打断的线程会从getTask()中马上返回null(情况1和情况2),此时工作线程退回到runWorker()方法的栈帧中,
             // 由于getTask()返回的是null,所以会跳出循环,执行processWorkerExit()方法,又会执行到tryTerminate()方法,
-            // 再次选出另一个工作线程打断,直到所有活着的工作线程都被打断了;其实就是一个打断的传播过程
+            // 再次选出另一个工作线程打断,直到所有活着的工作线程都被打断了,其实就是一个打断的传播过程;
             // 其实代码能执行到这里,存活的工作线程肯定不多了,这么做,是为了防止关闭线程池引发的混乱
             interruptIdleWorkers(ONLY_ONE);
             return;
