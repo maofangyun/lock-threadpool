@@ -2,7 +2,7 @@
  * 首先要明确一点,get()方法可能会被多个线程同时调用,并且获取同一个线程的返回结果
  */
 public V get() throws InterruptedException, ExecutionException {
-    // private static final int NEW          = 0;
+    // private static final int NEW          
     // private static final int COMPLETING   = 1;
     // private static final int NORMAL       = 2;
     // private static final int EXCEPTIONAL  = 3;
