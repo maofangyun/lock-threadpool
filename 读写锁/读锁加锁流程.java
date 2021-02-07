@@ -134,7 +134,7 @@ final int fullTryAcquireShared(Thread current) {
 
 
 /**
- * 读锁尝试加锁失败之后的流程
+ * 读锁尝试加锁失败之后的流程,进入同步队列中排队
  */
 private void doAcquireShared(int arg) {
     // 将当前线程包装成Node(共享模式)加入同步队列
