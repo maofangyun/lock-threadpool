@@ -1,11 +1,13 @@
 /**
  * Worker类的runWorker方法,run()方法就是调用的它
+ * Worker的启动发生在addWork()被调用时,即创建的时候就启动
  */
 final void runWorker(Worker w) {
     Thread wt = Thread.currentThread();
     // firstTask表示创建工作线程时,加入的任务,会优先执行
     Runnable task = w.firstTask;
     w.firstTask = null;
+    // 此时工作线程可以被打断
     w.unlock(); // allow interrupts
     boolean completedAbruptly = true;
     try {
