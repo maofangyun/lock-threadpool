@@ -60,7 +60,7 @@ private boolean addWorker(Runnable firstTask,boolean core) {
         for (;;) {
             // 获取工作线程数
             int wc = workerCountOf(c);
-            // 若工作线程数大于最大线程容量(536,870,911),创建新线程失败,返回fasle
+            // 若工作线程数大于最大线程容量(536870911),创建新线程失败,返回fasle
             // 若工作线程数大于约束,创建新线程失败,返回fasle
             // 若core=true,表示使用核心线程数做约束,core=false,表示使用最大线程数做约束
             if (wc >= CAPACITY ||

@@ -17,7 +17,7 @@ final void runWorker(Worker w) {
         while (task != null || (task = getTask()) != null) {
             // 加锁,防止任务在执行的时候,被其他线程中断
             w.lock();
-            // 当线程池状态>=STOP且线程中断标志位为false时,将线程中断标志位设置为true
+            // 当线程池状态>=STOP且线程中断标志位为false时,将线程中断标志位设置为true(保证线程池不在RUNNING状态时，线程的中断标志位为true)
             if ((runStateAtLeast(ctl.get(), STOP) ||
                  (Thread.interrupted() &&   // Thread.interrupted()会擦除中断标志
                   runStateAtLeast(ctl.get(), STOP))) &&
@@ -85,7 +85,7 @@ private void processWorkerExit(Worker w, boolean completedAbruptly) {
     if (runStateLessThan(c, STOP)) {
         // 判断此工作线程是否正常结束的
         // 若completedAbruptly=true:表示异常结束,直接再创建一个工作线程,填补这个结束的工作线程
-        // 若completedAbruptly=false:表示正常结束,若线程池的工作线程数小于最小线程数,也创建一个工作线程,提高工作队列中任务的执行效率
+        // 若completedAbruptly=false:表示正常结束,若线程池的工作线程数小于核心线程数,也创建一个工作线程,提高工作队列中任务的执行效率
         if (!completedAbruptly) {
             int min = allowCoreThreadTimeOut ? 0 : corePoolSize;
             if (min == 0 && ! workQueue.isEmpty())
